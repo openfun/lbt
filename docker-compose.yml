@@ -1,0 +1,17 @@
+version: "3.9"
+
+services:
+
+  locust-master:
+    image: locustio/locust:2.9.0
+    ports:
+     - "8089:8089"
+    volumes:
+      - ./src:/mnt/locust
+    command: -f /mnt/locust/locustfile.py --master -H http://locust-master:8089
+
+  locust-worker:
+    image: locustio/locust:2.9.0
+    volumes:
+      - ./src:/mnt/locust
+    command: -f /mnt/locust/locustfile.py --worker --master-host locust-master
