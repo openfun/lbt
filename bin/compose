@@ -17,4 +17,7 @@ else
   fi
 fi
 
-DOCKER_USER=${DOCKER_USER} ${COMPOSE} "$@"
+DOCKER_USER=${DOCKER_USER} ${COMPOSE} \
+  -f docker-compose.yml \
+  -f stores/learninglocker/docker-compose.yml \
+  "$@"

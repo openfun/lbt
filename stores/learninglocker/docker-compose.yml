@@ -1,0 +1,34 @@
+version: "3.9"
+
+services:
+
+  learninglocker-proxy:
+    image: caddy:2.5.1
+    restart: unless-stopped
+    ports:
+      - "8090:8090"
+    command: caddy reverse-proxy --from :8090 --to learninglocker-xapi:8091
+    depends_on:
+      - learninglocker-xapi
+
+  learninglocker-xapi:
+    image: learninglocker/xapi-service:6.0.0
+    command:
+      - bash
+      - "-c"
+      - "node dist/conformanceServer.js"
+    env_file:
+      - ./stores/learninglocker/env.d/xapi
+    ports:
+      - 8091:8091
+    depends_on:
+      - learninglocker-mongo
+      - learninglocker-redis
+
+  learninglocker-mongo:
+    image: mongo:4.4
+    command: --bind_ip_all
+
+  learninglocker-redis:
+    image: redis:4.0
+    command: redis-server --appendonly yes

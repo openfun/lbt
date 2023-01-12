@@ -8,10 +8,27 @@ services:
      - "8089:8089"
     volumes:
       - ./src:/mnt/locust
+    depends_on:
+      - locust-worker
     command: -f /mnt/locust/locustfile.py --master -H http://locust-master:8089
 
   locust-worker:
     image: locustio/locust:2.9.0
     volumes:
       - ./src:/mnt/locust
+      - ./data:/mnt/data
     command: -f /mnt/locust/locustfile.py --worker --master-host locust-master
+
+  datasim:
+    image: yetanalytics/datasim:0.1.7
+    env_file:
+      - env.d/datasim
+    volumes:
+      - ./data:/data
+
+  # -- Tools --
+  dockerize:
+    image: jwilder/dockerize
+
+  netshoot:
+    image: nicolaka/netshoot
