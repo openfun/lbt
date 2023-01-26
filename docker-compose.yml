@@ -10,8 +10,8 @@ services:
       - ./src:/mnt/locust
     depends_on:
       - locust-worker
-    command: -f /mnt/locust/locustfile.py --master -H http://locust-master:8089
-
+    command: -f /mnt/locust/locustfile.py --master -H ${TARGET_HOST}
+  #--no-web --expect-slaves ${SLAVES_NUMBER}
   locust-worker:
     image: locustio/locust:2.9.0
     volumes:
