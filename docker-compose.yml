@@ -1,6 +1,20 @@
 version: "3.9"
 
 services:
+  app:
+    build:
+      context: .
+      target: "${LBT_IMAGE_BUILD_TARGET:-development}"
+      args:
+        DOCKER_USER: ${DOCKER_USER:-1000}
+    user: ${DOCKER_USER:-1000}
+    image: "${LBTIMAGE_NAME:-lbt}:${LBT_IMAGE_TAG:-development}"
+    env_file:
+      - .env
+    environment:
+      PYLINTHOME: /app/.pylint.d
+    volumes:
+      - .:/app
 
   locust-master:
     image: locustio/locust:2.9.0
