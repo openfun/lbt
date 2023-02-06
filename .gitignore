@@ -6,6 +6,9 @@ __pycache__/
 # Generated datasets
 data/*.json
 
+# Locust results
+results/*.csv
+
 # Distribution / packaging
 .Python
 eggs/

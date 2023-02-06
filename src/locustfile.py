@@ -26,6 +26,8 @@ def _(parser):
 class BaseUser(HttpUser):
     """Base user simulating requests to the LRS."""
 
+    abstract = True
+
     def on_start(self):
         """Initialize user with basic authentication."""
         self.client.auth = (
@@ -48,4 +50,4 @@ class PostStatement(BaseUser):
         ) as xapi_file:
             for line in xapi_file:
                 payload += [json.loads(line)]
-        self.client.post("/xAPI/statements", json=payload)
+        self.client.post("/data/xAPI/statements", json=payload)

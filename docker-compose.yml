@@ -22,13 +22,17 @@ services:
      - "8089:8089"
     volumes:
       - ./src:/mnt/locust
+      - ./results:/mnt/results
     depends_on:
       - locust-worker
     command: -f /mnt/locust/locustfile.py --master -H ${TARGET_HOST}
                                           --lrs-login ${LRS_LOGIN}
                                           --lrs-password ${LRS_PASSWORD}
-                                          # --headless -u ${USER_NUMBER} -r ${SPAWN_RATE}
-                                          # --expect-workers ${SLAVES_NUMBER}
+                                          --csv=/mnt/results/${LRS}
+                                          --headless -u ${USERS_NUMBER} -r ${SPAWN_RATE}
+                                          --expect-workers ${WORKERS_NUMBER}
+                                          --run-time ${RUN_TIME}
+                                          --stop-timeout ${STOP_TIMEOUT}
   locust-worker:
     image: locustio/locust:2.9.0
     volumes:
