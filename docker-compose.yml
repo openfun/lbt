@@ -25,7 +25,10 @@ services:
     depends_on:
       - locust-worker
     command: -f /mnt/locust/locustfile.py --master -H ${TARGET_HOST}
-  #--no-web --expect-slaves ${SLAVES_NUMBER}
+                                          --lrs-login ${LRS_LOGIN}
+                                          --lrs-password ${LRS_PASSWORD}
+                                          # --headless -u ${USER_NUMBER} -r ${SPAWN_RATE}
+                                          # --expect-workers ${SLAVES_NUMBER}
   locust-worker:
     image: locustio/locust:2.9.0
     volumes:
