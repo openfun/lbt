@@ -17,7 +17,11 @@ else
   fi
 fi
 
+
+STORES=stores/*/docker-compose.yml
+COMPOSE_STORES=$(echo $STORES | sed 's/[^ ]* */-f &/g')
+
 DOCKER_USER=${DOCKER_USER} ${COMPOSE} \
   -f docker-compose.yml \
-  -f stores/learninglocker/docker-compose.yml \
+  ${COMPOSE_STORES} \
   "$@"
