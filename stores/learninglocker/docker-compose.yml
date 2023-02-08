@@ -18,7 +18,7 @@ services:
       - "-c"
       - "node dist/conformanceServer.js"
     env_file:
-      - ./stores/learninglocker/env.d/xapi
+      - ./stores/learninglocker/env.d/env
     ports:
       - 8091:8091
     depends_on:
