@@ -1,20 +1,36 @@
+RALPH_DB ?= es
+
 ES_INDEX = statements
 ES_URL   = http://localhost:9200
 
-es-index: ## create elasticsearch index
-	@echo "Creating $(ES_INDEX) index..."
-	curl -X PUT $(ES_URL)/$(ES_INDEX)
-	@echo -e "\nConfiguring $(ES_INDEX) index..."
-	curl -X PUT $(ES_URL)/$(ES_INDEX)/_settings -H 'Content-Type: application/json' -d '{"index": {"number_of_replicas": 0}}'
-.PHONY: es-index
-
-run-lrs-ralph: ## run ralph stack
+run-es: ## run elasticsearch database
 	$(COMPOSE) up -d ralph-es
 	$(DOCKERIZE) \
 		-wait tcp://ralph-es:9200 \
 		-timeout 60s
-	make es-index
-	$(COMPOSE) up -d ralph --build --force-recreate
+	@echo "Creating $(ES_INDEX) index..."
+	curl -X PUT $(ES_URL)/$(ES_INDEX)
+	@echo -e "\nConfiguring $(ES_INDEX) index..."
+	curl -X PUT $(ES_URL)/$(ES_INDEX)/_settings -H 'Content-Type: application/json' -d '{"index": {"number_of_replicas": 0}}'
+.PHONY: run-es 
+
+run-mongo: ## run mongo database
+	$(COMPOSE) up -d ralph-mongo
+	$(DOCKERIZE) \
+		-wait tcp://ralph-mongo:27017 \
+		-timeout 60s
+.PHONY: run-mongo
+
+run-clickhouse: ## run clickhouse database
+	$(COMPOSE) up -d ralph-clickhouse
+	$(DOCKERIZE) \
+		-wait tcp://ralph-clickhouse:9000 \
+		-timeout 60s
+.PHONY: run-clickhouse
+
+run-lrs-ralph: ## run ralph stack
+	@make run-$(RALPH_DB)
+	$(COMPOSE) up -d ralph
 	$(DOCKERIZE) \
 		-wait tcp://ralph:8090 \
 		-timeout 60s
