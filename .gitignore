@@ -7,7 +7,7 @@ __pycache__/
 data/*.json
 
 # Locust results
-results/*.csv
+results/*
 
 # Distribution / packaging
 .Python

@@ -1,20 +1,6 @@
 version: "3.9"
 
 services:
-  app:
-    build:
-      context: .
-      target: "${LBT_IMAGE_BUILD_TARGET:-development}"
-      args:
-        DOCKER_USER: ${DOCKER_USER:-1000}
-    user: ${DOCKER_USER:-1000}
-    image: "${LBTIMAGE_NAME:-lbt}:${LBT_IMAGE_TAG:-development}"
-    env_file:
-      - .env
-    environment:
-      PYLINTHOME: /app/.pylint.d
-    volumes:
-      - .:/app
 
   locust-master:
     image: locustio/locust:2.9.0
@@ -25,14 +11,14 @@ services:
       - ./results:/mnt/results
     depends_on:
       - locust-worker
-    command: -f /mnt/locust/locustfile.py --master -H ${TARGET_HOST}
+    command: -f /mnt/locust/locustfile.py --master -H "http://${LRS}:${LRS_PORT}/${ENDPOINT_PREFIX}"
                                           --lrs-login ${LRS_LOGIN}
                                           --lrs-password ${LRS_PASSWORD}
                                           --csv=/mnt/results/${LRS}
-                                          --headless -u ${USERS_NUMBER} -r ${SPAWN_RATE}
                                           --expect-workers ${WORKERS_NUMBER}
                                           --run-time ${RUN_TIME}
                                           --stop-timeout ${STOP_TIMEOUT}
+                                          --headless -u ${USERS_NUMBER} -r ${SPAWN_RATE}
   locust-worker:
     image: locustio/locust:2.9.0
     volumes:
@@ -51,5 +37,16 @@ services:
   dockerize:
     image: jwilder/dockerize
 
-  netshoot:
-    image: nicolaka/netshoot
+  notebook:
+    image: jupyter/base-notebook
+    user: ${DOCKER_USER:-1000}
+    environment:
+      NB_UID: ${DOCKER_UID:-1000}
+      NB_GID: ${DOCKER_GID:-1000}
+      CHOWN_HOME: 'yes'
+      CHOWN_HOME_OPTS: -R
+    ports:
+      - 8888:8888
+    volumes:
+      - .:/home/jovyan/work
+      - ./data:/mnt/data
