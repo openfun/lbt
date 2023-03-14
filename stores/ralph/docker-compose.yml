@@ -2,28 +2,24 @@ version: "3.9"
 
 services:
 
-  ralph-proxy:
-    image: caddy:2.5.1
-    restart: unless-stopped
-    ports:
-      - "8090:8090"
-    command: caddy reverse-proxy --from :8090 --to ralph-server:8091
-    depends_on:
-      - ralph-server
-
-  ralph-server:
+  ralph:
     image: fundocker/ralph:latest
-    command:
-      - ralph
-      - "-v"
-      - DEBUG
-      - runserver
-      - "-b"
-      - "${RALPH_RUNSERVER_BACKEND:-es}"
     env_file:
       - ./stores/ralph/env.d/env
     ports:
-      - "8091:8091"
+      - "${RALPH_RUNSERVER_PORT:-8090}:${RALPH_RUNSERVER_PORT:-8090}"
+    command:
+      - "uvicorn"
+      - "ralph.api:app"
+      - "--proxy-headers"
+      - "--workers"
+      - "1"
+      - "--host"
+      - "${RALPH_RUNSERVER_HOST:-0.0.0.0}"
+      - "--port"
+      - "${RALPH_RUNSERVER_PORT:-8090}"
+    volumes:
+      - ./stores/ralph/:/app
     depends_on:
       - ralph-es
 

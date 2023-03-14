@@ -1,3 +1,10 @@
+# Configuration
+RALPH_APP_DIR=/app/.ralph
+
+# Uncomment lines (by removing # characters at the beginning of target lines)
+# to define environment variables associated to the backend(s) you need.
+
+
 # LDP storage backend
 #
 # You need to generate an API token for your OVH's account and fill the service
@@ -37,11 +44,19 @@
 
 # ES database backend
 
-RALPH_BACKENDS__DATABASE__ES__HOSTS=http://ralph-elasticsearch:9200
+RALPH_BACKENDS__DATABASE__ES__HOSTS=http://ralph-es:9200
 RALPH_BACKENDS__DATABASE__ES__INDEX=statements
-RALPH_BACKENDS__DATABASE__ES__TEST_HOSTS=http://elasticsearch:9200
-RALPH_BACKENDS__DATABASE__ES__TEST_INDEX=test-index
-RALPH_BACKENDS__DATABASE__ES__TEST_FORWARDING_INDEX=test-index-2
+# RALPH_BACKENDS__DATABASE__ES__TEST_HOSTS=http://elasticsearch:9200
+# RALPH_BACKENDS__DATABASE__ES__TEST_INDEX=test-index
+# RALPH_BACKENDS__DATABASE__ES__TEST_FORWARDING_INDEX=test-index-2
+
+# Asynchronous ES database backend
+
+RALPH_BACKENDS__DATABASE__ES_ASYNC__HOSTS=http://ralph-es:9200
+RALPH_BACKENDS__DATABASE__ES_ASYNC__INDEX=statements
+# RALPH_BACKENDS__DATABASE__ASYNC_ES__TEST_HOSTS=http://elasticsearch:9200
+# RALPH_BACKENDS__DATABASE__ASYNC_ES__TEST_INDEX=test-index
+# RALPH_BACKENDS__DATABASE__ASYNC_ES__TEST_FORWARDING_INDEX=test-index-2
 
 # MONGO database backend
 
@@ -64,8 +79,14 @@ RALPH_BACKENDS__DATABASE__ES__TEST_FORWARDING_INDEX=test-index-2
 
 # LRS API
 
-RALPH_RUNSERVER_BACKEND=es
+# RALPH_RUNSERVER_BACKEND=es
 # RALPH_RUNSERVER_HOST=0.0.0.0
 # RALPH_RUNSERVER_MAX_SEARCH_HITS_COUNT=100
 # RALPH_RUNSERVER_POINT_IN_TIME_KEEP_ALIVE=1m
 # RALPH_RUNSERVER_PORT=8100
+
+RALPH_RUNSERVER_BACKEND=es
+RALPH_RUNSERVER_HOST=0.0.0.0
+RALPH_RUNSERVER_MAX_SEARCH_HITS_COUNT=100
+RALPH_RUNSERVER_POINT_IN_TIME_KEEP_ALIVE=1m
+RALPH_RUNSERVER_PORT=8100
