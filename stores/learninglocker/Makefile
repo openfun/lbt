@@ -5,6 +5,8 @@ run-lrs-learninglocker: ## run learning-locker stack
 		-wait tcp://learninglocker-mongo:27017 \
 		-wait tcp://learninglocker-redis:6379 \
 		-timeout 60s
-	$(COMPOSE) up -d learninglocker-proxy
-	$(DOCKERIZE) -wait tcp://learninglocker-proxy:8090 -timeout 60s
+	$(COMPOSE) up -d learninglocker
+	$(DOCKERIZE) \
+		-wait tcp://learninglocker:8090 \
+		-timeout 60s
 .PHONY: run-lrs-learninglocker
