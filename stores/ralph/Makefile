@@ -14,6 +14,11 @@ run-es: ## run elasticsearch database
 	curl -X PUT $(ES_URL)/$(ES_INDEX)/_settings -H 'Content-Type: application/json' -d '{"index": {"number_of_replicas": 0}}'
 .PHONY: run-es 
 
+run-async_es: ## run elasticsearch database for async backend
+run-async_es: \
+	run-es
+.PHONY: run-async_es
+
 run-mongo: ## run mongo database
 	$(COMPOSE) up -d ralph-mongo
 	$(DOCKERIZE) \
@@ -32,6 +37,6 @@ run-lrs-ralph: ## run ralph stack
 	@make run-$(RALPH_DB)
 	$(COMPOSE) up -d ralph
 	$(DOCKERIZE) \
-		-wait tcp://ralph:8090 \
+		-wait http://ralph:8090/__heartbeat__ \
 		-timeout 60s
 .PHONY: run-lrs-ralph

@@ -3,7 +3,6 @@ version: "3.9"
 services:
 
   lrsql:
-    # build: . # switch to this for active dev
     image: yetanalytics/lrsql:latest
     command:
       - /lrsql/bin/run_postgres.sh
@@ -12,11 +11,11 @@ services:
     depends_on:
       - lrsql-postgres
     env_file:
-      - ./stores/lrsql/env.d/env
+      - ./stores/lrsql/env.d/.env
 
   lrsql-postgres:
     image: postgres
     ports:
       - "5432:5432"
     env_file:
-      - ./stores/lrsql/env.d/env
+      - ./stores/lrsql/env.d/.env
