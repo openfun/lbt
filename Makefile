@@ -6,10 +6,11 @@ COMPOSE_TEST_RUN        = $(COMPOSE_RUN)
 COMPOSE_TEST_RUN_APP    = $(COMPOSE_TEST_RUN) app
 DOCKERIZE               = $(COMPOSE_RUN) dockerize
 
-# -- LRS
+# -- LRS to be tested
 LRS             ?= ralph
 LRS_PORT        ?= 8090
 
+# Different LRS have different prefix endpoint
 ifeq ($(LRS),learninglocker)
     ENDPOINT_PREFIX = data/xAPI
 else ifeq ($(LRS),ralph)
@@ -19,15 +20,33 @@ else ifeq ($(LRS),lrsql)
 endif
 
 # -- Locust configuration
-USERS_NUMBER   ?= 1
-SPAWN_RATE     ?= 100
-WORKERS_NUMBER ?= 1
-RUN_TIME       ?= 4m
-STOP_TIMEOUT   ?= 0
+
+# Scenario to be run
+SCENARIO          ?= post
+# Number of the iteration
+ITERATION          ?= 01
+# Number of locust users
+USERS_NUMBER       ?= 1
+# Number of users to be spawned by seconds
+SPAWN_RATE         ?= 1
+# Number of locust workers to be run
+WORKERS_NUMBER     ?= 1
+# Duration of the run (in seconds)
+RUN_TIME           ?= 900
+# Time to stop its tasks at the end of the run 
+STOP_TIMEOUT       ?= 0
+# Number of students emitting statements
+STUDENTS_NUMBER    ?= 200
+# Seed for generating random students
+STUDENT_SEED       ?= 742
+# Number of statements sent per request
+STATEMENTS_PER_REQ ?= 2200
+# Total number of statements to be sent in a run
+STATEMENT_NUMBER = $(shell echo $$(($(STATEMENTS_PER_REQ) * 100)))
 
 # -- Credentials
-LRS_LOGIN    ?= AAA
-LRS_PASSWORD ?= BBB
+LRS_LOGIN    = AAA
+LRS_PASSWORD = BBB
 
 # Export variables to environment 
 export
@@ -39,23 +58,43 @@ default: help
 
 bootstrap: ## bootstrap the project
 bootstrap: \
-	data/dataset.json
+	dataspec \
+	dataset
 .PHONY: bootstrap
 
-data/dataset.json:
-	$(COMPOSE_RUN) datasim -i /data/dataset.spec.json generate > ./data/dataset.json
-	split -d --additional-suffix=.json ./data/dataset.json ./data/dataset-
+dataspec: ## generate the dataspec
+	@echo "Generating data specification for $(STUDENTS_NUMBER) students..."
+	@bin/gen_data_spec
+.PHONY: dataspec
+
+dataset: ## generate the dataset
+	@rm -f data/set/*.json
+
+	@$(COMPOSE_RUN) datasim \
+		-p /data/inputs/dataset.profiles.json \
+		-a /data/inputs/dataset.personae.json \
+		-l /data/inputs/dataset.alignments.json \
+		-o /data/inputs/dataset.parameters.json \
+		validate-input /data/spec/dataset.spec.json
+
+	@echo "Generating dataset..."
+	@$(COMPOSE_RUN) datasim \
+		-i /data/spec/dataset.spec.json generate | \
+		split -l $(STATEMENTS_PER_REQ) -d --suffix-length=4 --additional-suffix=.json - ./data/set/dataset- 
+
+	@echo "Dataset of $(STATEMENT_NUMBER) statements successfully generated!"
+.PHONY: dataset
 
 down: ## stop and remove backend containers
 	@$(COMPOSE) down
 .PHONY: down
 
-logs: ## display locust master logs (follow mode)
-	@$(COMPOSE) logs -f locust-master
+logs: ## display locust logs (follow mode)
+	@$(COMPOSE) logs -f locust
 .PHONY: logs
 
 logs-notebook: ## display app logs (follow mode)
-	@$(COMPOSE) logs -f notebook
+	@$(COMPOSE) logs -f notebooks-notebook
 .PHONY: logs
 
 run-locust: ## run locust
@@ -67,14 +106,13 @@ list-lrs: ## list the LRS available
 .PHONY: list-lrs
 
 run-notebook: ## run notebook server
-	@$(COMPOSE) up -d notebook
+	@$(COMPOSE) up -d --no-deps --build notebooks-notebook
 .PHONY: run-notebook
 
 run: ## run all stacks for LRS chosen with `LRS=`
 run: \
 	run-lrs-$(LRS) \
-	run-locust 
-# 
+	run-locust
 .PHONY: run
 
 status: ## an alias for "docker-compose ps"

@@ -3,9 +3,6 @@ __pycache__/
 *.py[cod]
 *$py.class
 
-# Generated datasets
-data/*.json
-
 # Locust results
 results/*
 
@@ -27,9 +24,7 @@ share/python-wheels/
 MANIFEST
 
 # Environments
-.env
 .venv
-env/
 venv/
 ENV/
 env.bak/
