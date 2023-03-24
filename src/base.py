@@ -1,8 +1,9 @@
 """LBT entrypoint."""
-import json
-from random import randint
 
-from locust import HttpUser, events, task
+from base64 import b64encode
+from locust import FastHttpUser, events
+
+from common.utils import DatasetReader
 
 
 @events.init_command_line_parser.add_listener
@@ -23,31 +24,24 @@ def _(parser):
     )
 
 
-class BaseUser(HttpUser):
+def _construct_basic_auth_str(username, password):
+    """Construct Authorization header value to be used in HTTP Basic Auth"""
+    if isinstance(username, str):
+        username = username.encode("latin1")
+    if isinstance(password, str):
+        password = password.encode("latin1")
+    return "Basic " + b64encode(b":".join((username, password))).strip().decode("ascii")
+
+
+class BaseUser(FastHttpUser):
     """Base user simulating requests to the LRS."""
 
     abstract = True
+    default_headers = {"X-Experience-API-Version": "1.0.3"}
 
     def on_start(self):
         """Initialize user with basic authentication."""
-        self.client.auth = (
+        self.client.auth_header = _construct_basic_auth_str(
             self.environment.parsed_options.lrs_login,
             self.environment.parsed_options.lrs_password,
         )
-        self.client.headers.update({"X-Experience-API-Version": "1.0.3"})
-
-
-class PostStatement(BaseUser):
-    """User requesting to POST statements to the LRS."""
-
-    @task
-    def statements_post(self):
-        """Send POST request to the /xAPI/statements endpoint."""
-        payload = []
-        dataset = randint(0, 18)
-        with open(
-            f"/mnt/data/dataset-{dataset:02d}.json", encoding="utf8"
-        ) as xapi_file:
-            for line in xapi_file:
-                payload += [json.loads(line)]
-        self.client.post("/data/xAPI/statements", json=payload)

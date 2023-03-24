@@ -3,42 +3,44 @@ version: "3.9"
 services:
 
   locust-master:
-    image: locustio/locust:2.9.0
+    build: .
     ports:
      - "8089:8089"
     volumes:
       - ./src:/mnt/locust
+      - ./data:/mnt/data
       - ./results:/mnt/results
     depends_on:
       - locust-worker
-    command: -f /mnt/locust/locustfile.py --master -H "http://${LRS}:${LRS_PORT}/${ENDPOINT_PREFIX}"
-                                          --lrs-login ${LRS_LOGIN}
-                                          --lrs-password ${LRS_PASSWORD}
-                                          --csv=/mnt/results/${LRS}
-                                          --expect-workers ${WORKERS_NUMBER}
-                                          --run-time ${RUN_TIME}
-                                          --stop-timeout ${STOP_TIMEOUT}
-                                          --headless -u ${USERS_NUMBER} -r ${SPAWN_RATE}
+    command: -f /mnt/locust/${SCENARIO}.py
+             -H "http://${LRS}:${LRS_PORT}/${ENDPOINT_PREFIX}"
+             --lrs-login ${LRS_LOGIN}
+             --lrs-password ${LRS_PASSWORD}
+             --csv=/mnt/results/${LRS}_${SCENARIO}_${ITERATION}
+             --run-time ${RUN_TIME}s
+             --stop-timeout ${STOP_TIMEOUT}
+             --headless -u ${USERS_NUMBER} -r ${SPAWN_RATE}
+             --master
+             --expect-workers=${WORKERS_NUMBER}
+
   locust-worker:
-    image: locustio/locust:2.9.0
+    build: .
     volumes:
       - ./src:/mnt/locust
       - ./data:/mnt/data
-    command: -f /mnt/locust/locustfile.py --worker --master-host locust-master
-
+    command: -f /mnt/locust/${SCENARIO}.py 
+             --worker 
+             --master-host locust-master
   datasim:
-    image: yetanalytics/datasim:0.1.7
-    env_file:
-      - env.d/datasim
+    image: yetanalytics/datasim:latest
+    environment:
+      - CREDENTIALS=admin:funfunfun
+      - API_ALLOWED_ORIGINS=*
     volumes:
       - ./data:/data
 
-  # -- Tools --
-  dockerize:
-    image: jwilder/dockerize
-
-  notebook:
-    image: jupyter/base-notebook
+  notebooks-notebook:
+    build: ./notebooks
     user: ${DOCKER_USER:-1000}
     environment:
       NB_UID: ${DOCKER_UID:-1000}
@@ -49,4 +51,9 @@ services:
       - 8888:8888
     volumes:
       - .:/home/jovyan/work
-      - ./data:/mnt/data
+      - ./results:/mnt/results
+
+
+  # -- Tools --
+  dockerize:
+    image: jwilder/dockerize
