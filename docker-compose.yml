@@ -16,7 +16,7 @@ services:
              -H "http://${LRS}:${LRS_PORT}/${ENDPOINT_PREFIX}"
              --lrs-login ${LRS_LOGIN}
              --lrs-password ${LRS_PASSWORD}
-             --csv=/mnt/results/${LRS}_${SCENARIO}_${ITERATION}
+             --csv=/mnt/results/${RESULT_PREFIX}_${LRS}_${SCENARIO}_${ITERATION}
              --run-time ${RUN_TIME}s
              --stop-timeout ${STOP_TIMEOUT}
              --headless -u ${USERS_NUMBER} -r ${SPAWN_RATE}

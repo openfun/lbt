@@ -42,7 +42,9 @@ STUDENT_SEED       ?= 742
 # Number of statements sent per request
 STATEMENTS_PER_REQ ?= 2200
 # Total number of statements to be sent in a run
-STATEMENT_NUMBER = $(shell echo $$(($(STATEMENTS_PER_REQ) * 100)))
+STATEMENT_NUMBER = $(shell echo $$(($(STATEMENTS_PER_REQ) * 1000)))
+# Prefix for locust result files
+RESULT_PREFIX ?= run
 
 # -- Credentials
 LRS_LOGIN    = AAA
