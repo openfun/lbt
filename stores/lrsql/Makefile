@@ -1,3 +1,7 @@
+# Endpoint prefix for lrsql
+ifeq ($(LRS),lrsql)
+	ENDPOINT_PREFIX = xapi
+endif
 
 run-lrs-lrsql: ## run lrsql stack
 	$(COMPOSE) up -d lrsql-postgres

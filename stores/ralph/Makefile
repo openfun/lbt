@@ -1,3 +1,8 @@
+# Endpoint prefix for ralph
+ifeq ($(LRS),xapi)
+	ENDPOINT_PREFIX = xapi
+endif
+
 RALPH_DB ?= es
 
 ES_INDEX = statements

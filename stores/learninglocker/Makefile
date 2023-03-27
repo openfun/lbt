@@ -1,3 +1,7 @@
+# Endpoint prefix for learninglocker
+ifeq ($(LRS),learninglocker)
+    ENDPOINT_PREFIX = data/xAPI
+endif
 
 run-lrs-learninglocker: ## run learning-locker stack
 	$(COMPOSE) up -d learninglocker-mongo learninglocker-redis

@@ -10,17 +10,7 @@ DOCKERIZE               = $(COMPOSE_RUN) dockerize
 LRS             ?= ralph
 LRS_PORT        ?= 8090
 
-# Different LRS have different prefix endpoint
-ifeq ($(LRS),learninglocker)
-    ENDPOINT_PREFIX = data/xAPI
-else ifeq ($(LRS),ralph)
-	ENDPOINT_PREFIX = xAPI
-else ifeq ($(LRS),lrsql)
-	ENDPOINT_PREFIX = xapi
-endif
-
 # -- Locust configuration
-
 # Scenario to be run
 SCENARIO          ?= post
 # Number of the iteration
@@ -46,9 +36,14 @@ STATEMENT_NUMBER = $(shell echo $$(($(STATEMENTS_PER_REQ) * 1000)))
 # Prefix for locust result files
 RESULT_PREFIX ?= run
 
+# Directory of the run 
+RUN_DIR ?= 
+
 # -- Credentials
 LRS_LOGIN    = AAA
 LRS_PASSWORD = BBB
+
+default: help
 
 # Export variables to environment 
 export
@@ -56,7 +51,6 @@ export
 # Include implemented LRS makefiles
 include $(wildcard stores/*/Makefile)
 
-default: help
 
 bootstrap: ## bootstrap the project
 bootstrap: \
@@ -116,6 +110,14 @@ run: \
 	run-lrs-$(LRS) \
 	run-locust
 .PHONY: run
+
+start-protocol: ## start a run
+	$(eval RUN_DIR := $(shell date +"%Y-%m-%d_%Hh%Mm%Ss"))
+	@mkdir runs/$(RUN_DIR) && mkdir runs/$(RUN_DIR)/results
+	@cp bin/protocol runs/$(RUN_DIR)
+	@echo "Starting protocol under $(RUN_DIR)"
+	@runs/$(RUN_DIR)/protocol
+.PHONY: start-protocol
 
 status: ## an alias for "docker-compose ps"
 	@$(COMPOSE) ps

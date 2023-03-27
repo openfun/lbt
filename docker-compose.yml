@@ -9,26 +9,26 @@ services:
     volumes:
       - ./src:/mnt/locust
       - ./data:/mnt/data
-      - ./results:/mnt/results
+      - ./runs/${RUN_DIR:-..}/results:/mnt/results
     depends_on:
       - locust-worker
-    command: -f /mnt/locust/${SCENARIO}.py
-             -H "http://${LRS}:${LRS_PORT}/${ENDPOINT_PREFIX}"
-             --lrs-login ${LRS_LOGIN}
-             --lrs-password ${LRS_PASSWORD}
-             --csv=/mnt/results/${RESULT_PREFIX}_${LRS}_${SCENARIO}_${ITERATION}
-             --run-time ${RUN_TIME}s
-             --stop-timeout ${STOP_TIMEOUT}
-             --headless -u ${USERS_NUMBER} -r ${SPAWN_RATE}
+    command: -f /mnt/locust/${SCENARIO:-post}.py
+             -H "http://${LRS:-ralph}:${LRS_PORT:-8090}/${ENDPOINT_PREFIX:-xAPI}"
+             --lrs-login ${LRS_LOGIN:-AAA}
+             --lrs-password ${LRS_PASSWORD:-BBB}
+             --csv=/mnt/results/${RESULT_PREFIX:-run}_${LRS:-ralph}_${SCENARIO:-post}_${ITERATION:-1}
+             --run-time ${RUN_TIME:-100}s
+             --stop-timeout ${STOP_TIMEOUT:-0}
+             --headless -u ${USERS_NUMBER:-1000} -r ${SPAWN_RATE:-10}
              --master
-             --expect-workers=${WORKERS_NUMBER}
+             --expect-workers=${WORKERS_NUMBER:-1}
 
   locust-worker:
     build: .
     volumes:
       - ./src:/mnt/locust
       - ./data:/mnt/data
-    command: -f /mnt/locust/${SCENARIO}.py 
+    command: -f /mnt/locust/${SCENARIO:-post}.py 
              --worker 
              --master-host locust-master
   datasim:
