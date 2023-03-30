@@ -23,13 +23,12 @@ make dataset
 
 # Scenario to be run
 SCENARIO=post
-ITERATION_NUMBER=2
+ITERATION_NUMBER=3
 
 # Test for Ralph with Elasticsearch database
 LRS=ralph
 RALPH_DB=es
 RALPH_NUMBER_OF_WORKERS=1
-RESULT_PREFIX=workers_1
 
 # Launch test
 for ((i=1;i<=ITERATION_NUMBER;i++));
@@ -41,12 +40,11 @@ do
     sleep $BREAK_TIME
 done
 
-# Test for Ralph with Elasticsearch database
-LRS=ralph
-RALPH_DB=es
-RALPH_NUMBER_OF_WORKERS=3
-RESULT_PREFIX=workers_3
 
+
+# Test for Learninglocker
+LRS=learninglocker
+# 
 # Launch test
 for ((i=1;i<=ITERATION_NUMBER;i++));
 do
@@ -57,11 +55,10 @@ do
     sleep $BREAK_TIME
 done
 
-# Test for Ralph with Elasticsearch database
-LRS=ralph
-RALPH_DB=es
-RALPH_NUMBER_OF_WORKERS=6
-RESULT_PREFIX=workers_6
+
+
+# Test for lrsql
+LRS=lrsql
 
 # Launch test
 for ((i=1;i<=ITERATION_NUMBER;i++));
@@ -72,33 +69,5 @@ do
     make down
     sleep $BREAK_TIME
 done
-
-# # Test for Learninglocker
-# LRS=learninglocker
-
-# # Launch test
-# for ((i=1;i<=ITERATION_NUMBER;i++));
-# do
-#     ITERATION=$(printf "%02d" $i)
-#     make run
-#     sleep $RUN_TIME
-#     make down
-#     sleep $BREAK_TIME
-# done
-
-
-
-# # Test for lrsql
-# LRS=lrsql
-
-# # Launch test
-# for ((i=1;i<=ITERATION_NUMBER;i++));
-# do
-#     ITERATION=$(printf "%02d" $i)
-#     make run
-#     sleep $RUN_TIME
-#     make down
-#     sleep $BREAK_TIME
-# done
 
 echo "Run test finished!"
