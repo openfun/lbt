@@ -1,0 +1,57 @@
+version: "3.9"
+
+services:
+
+  ralph:
+    image: fundocker/ralph:latest
+    env_file:
+      - ./stores/ralph/env.d/.env
+    environment:
+      RALPH_RUNSERVER_BACKEND: ${RALPH_DB:-es}
+    ports:
+      - "${RALPH_RUNSERVER_PORT:-8090}:${RALPH_RUNSERVER_PORT:-8090}"
+    command:
+      - "uvicorn"
+      - "ralph.api:app"
+      - "--proxy-headers"
+      - "--workers"
+      - "${RALPH_NUMBER_OF_WORKERS:-1}"
+      - "--host"
+      - "${RALPH_RUNSERVER_HOST:-0.0.0.0}"
+      - "--port"
+      - "${RALPH_RUNSERVER_PORT:-8090}"
+    working_dir: /tmp/ralph
+    volumes:
+      - ./stores/ralph/:/tmp/ralph
+
+  ralph-es:
+    image: elasticsearch:8.1.0
+    environment:
+      discovery.type: single-node
+      xpack.security.enabled: "false"
+    ports:
+      - "9200:9200"
+    mem_limit: 2g
+
+  ralph-mongo:
+    image: mongo:5.0.9
+    ports:
+      - "27017:27017"
+
+  ralph-clickhouse:
+      image: clickhouse/clickhouse-server:23.1.1.3077-alpine
+      environment:
+          CLICKHOUSE_DB: xapi
+          CLICKHOUSE_DEFAULT_ACCESS_MANAGEMENT: 1
+      ports:
+          - 8123:8123
+          - 9000:9000
+      # ClickHouse needs to maintain a lot of open files, so they
+      # suggest running the container with increased limits:
+      # https://hub.docker.com/r/clickhouse/clickhouse-server/#!
+      ulimits:
+          nofile:
+              soft: 262144
+              hard: 262144
+      volumes:
+      - ./stores/ralph/initdb.d:/docker-entrypoint-initdb.d

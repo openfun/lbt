@@ -1,0 +1,13 @@
+{
+    "lrs": {
+        "adminUserDefault": "my_username",
+        "adminPassDefault": "my_password",
+        "authorityUrl": "http://mydomain.com"
+    },
+    "webserver": {
+        "httpHost": "0.0.0.0",
+        "httpPort": 8090,
+        "sslPort": 8443,
+        "allowAllOrigins": true
+    }
+}

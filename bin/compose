@@ -1,0 +1,27 @@
+#!/usr/bin/env bash
+
+set -eo pipefail
+
+declare DOCKER_USER
+declare COMPOSE
+
+DOCKER_USER="$(id -u):$(id -g)"
+if docker compose &> /dev/null ; then
+  COMPOSE="docker compose"
+else
+  if which docker-compose &> /dev/null ; then
+    COMPOSE="docker-compose"
+  else
+    echo "Docker compose is required to run this script. Please, install it first."
+    exit 1
+  fi
+fi
+
+
+STORES=stores/*/docker-compose.yml
+COMPOSE_STORES=$(echo $STORES | sed 's/[^ ]* */-f &/g')
+
+DOCKER_USER=${DOCKER_USER} ${COMPOSE} \
+  -f docker-compose.yml \
+  ${COMPOSE_STORES} \
+  "$@"

@@ -1,0 +1,48 @@
+version: "3.9"
+
+services:
+
+  locust:
+    build: .
+    ports:
+     - "8089:8089"
+    volumes:
+      - ./src:/mnt/locust
+      - ./data:/mnt/data
+      - ./runs/${RUN_DIR:-..}/results:/mnt/results
+    command: -f /mnt/locust/${SCENARIO:-post}.py
+             -H "http://${LRS:-ralph}:${LRS_PORT:-8090}/${ENDPOINT_PREFIX:-xAPI}"
+             --lrs-login ${LRS_LOGIN:-AAA}
+             --lrs-password ${LRS_PASSWORD:-BBB}
+             --statements-per-req ${STATEMENTS_PER_REQ:-1}
+             --csv=/mnt/results/${RESULT_PREFIX:-run}_${LRS:-ralph}_${SCENARIO:-post}_${ITERATION:-1}
+             --run-time ${RUN_TIME:-100}s
+             --stop-timeout ${STOP_TIMEOUT:-0}
+             --headless -u ${USERS_NUMBER:-1} -r ${SPAWN_RATE:-1}
+
+  datasim:
+    image: yetanalytics/datasim:latest
+    environment:
+      - CREDENTIALS=admin:funfunfun
+      - API_ALLOWED_ORIGINS=*
+    volumes:
+      - ./data:/data
+
+  notebooks-notebook:
+    build: ./notebooks
+    user: ${DOCKER_USER:-1000}
+    environment:
+      NB_UID: ${DOCKER_UID:-1000}
+      NB_GID: ${DOCKER_GID:-1000}
+      CHOWN_HOME: 'yes'
+      CHOWN_HOME_OPTS: -R
+    ports:
+      - 8888:8888
+    volumes:
+      - .:/home/jovyan/work
+      - ./results:/mnt/results
+
+
+  # -- Tools --
+  dockerize:
+    image: jwilder/dockerize
