@@ -1,9 +1,8 @@
 """LBT entrypoint."""
 
-from base64 import b64encode
 from locust import FastHttpUser, events
 
-from common.utils import DatasetReader
+from common.utils import construct_basic_auth_str
 
 
 @events.init_command_line_parser.add_listener
@@ -22,15 +21,13 @@ def _(parser):
         default="",
         help="Password for LRS basic authentication",
     )
-
-
-def _construct_basic_auth_str(username, password):
-    """Construct Authorization header value to be used in HTTP Basic Auth"""
-    if isinstance(username, str):
-        username = username.encode("latin1")
-    if isinstance(password, str):
-        password = password.encode("latin1")
-    return "Basic " + b64encode(b":".join((username, password))).strip().decode("ascii")
+    parser.add_argument(
+        "--statements-per-req",
+        type=int,
+        env_var="STATEMENTS_PER_REQ",
+        default="",
+        help="Number of statements to post/get per request",
+    )
 
 
 class BaseUser(FastHttpUser):
@@ -41,7 +38,7 @@ class BaseUser(FastHttpUser):
 
     def on_start(self):
         """Initialize user with basic authentication."""
-        self.client.auth_header = _construct_basic_auth_str(
+        self.client.auth_header = construct_basic_auth_str(
             self.environment.parsed_options.lrs_login,
             self.environment.parsed_options.lrs_password,
         )

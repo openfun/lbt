@@ -2,7 +2,7 @@ version: "3.9"
 
 services:
 
-  locust-master:
+  locust:
     build: .
     ports:
      - "8089:8089"
@@ -10,27 +10,16 @@ services:
       - ./src:/mnt/locust
       - ./data:/mnt/data
       - ./runs/${RUN_DIR:-..}/results:/mnt/results
-    depends_on:
-      - locust-worker
     command: -f /mnt/locust/${SCENARIO:-post}.py
              -H "http://${LRS:-ralph}:${LRS_PORT:-8090}/${ENDPOINT_PREFIX:-xAPI}"
              --lrs-login ${LRS_LOGIN:-AAA}
              --lrs-password ${LRS_PASSWORD:-BBB}
+             --statements-per-req ${STATEMENTS_PER_REQ:-1}
              --csv=/mnt/results/${RESULT_PREFIX:-run}_${LRS:-ralph}_${SCENARIO:-post}_${ITERATION:-1}
              --run-time ${RUN_TIME:-100}s
              --stop-timeout ${STOP_TIMEOUT:-0}
-             --headless -u ${USERS_NUMBER:-1000} -r ${SPAWN_RATE:-10}
-             --master
-             --expect-workers=${WORKERS_NUMBER:-1}
+             --headless -u ${USERS_NUMBER:-1} -r ${SPAWN_RATE:-1}
 
-  locust-worker:
-    build: .
-    volumes:
-      - ./src:/mnt/locust
-      - ./data:/mnt/data
-    command: -f /mnt/locust/${SCENARIO:-post}.py 
-             --worker 
-             --master-host locust-master
   datasim:
     image: yetanalytics/datasim:latest
     environment:

@@ -19,8 +19,6 @@ ITERATION          ?= 01
 USERS_NUMBER       ?= 1
 # Number of users to be spawned by seconds
 SPAWN_RATE         ?= 1
-# Number of locust workers to be run
-WORKERS_NUMBER     ?= 1
 # Duration of the run (in seconds)
 RUN_TIME           ?= 900
 # Time to stop its tasks at the end of the run 
@@ -32,7 +30,7 @@ STUDENT_SEED       ?= 742
 # Number of statements sent per request
 STATEMENTS_PER_REQ ?= 2200
 # Total number of statements to be sent in a run
-STATEMENT_NUMBER = $(shell echo $$(($(STATEMENTS_PER_REQ) * 1000)))
+STATEMENT_NUMBER = $(shell echo $$(($(STATEMENTS_PER_REQ) * 100)))
 # Prefix for locust result files
 RESULT_PREFIX ?= run
 
@@ -94,7 +92,7 @@ logs-notebook: ## display app logs (follow mode)
 .PHONY: logs
 
 run-locust: ## run locust
-	@$(COMPOSE) up -d locust-master
+	@$(COMPOSE) up -d locust
 .PHONY: run-locust
 
 list-lrs: ## list the LRS available

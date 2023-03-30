@@ -1,6 +1,6 @@
 # Endpoint prefix for ralph
-ifeq ($(LRS),xapi)
-	ENDPOINT_PREFIX = xapi
+ifeq ($(LRS),ralph)
+	ENDPOINT_PREFIX = xAPI
 endif
 
 RALPH_DB ?= es

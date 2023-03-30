@@ -20,8 +20,9 @@ services:
       - "${RALPH_RUNSERVER_HOST:-0.0.0.0}"
       - "--port"
       - "${RALPH_RUNSERVER_PORT:-8090}"
+    working_dir: /tmp/ralph
     volumes:
-      - ./stores/ralph/:/app
+      - ./stores/ralph/:/tmp/ralph
 
   ralph-es:
     image: elasticsearch:8.1.0
