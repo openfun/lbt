@@ -3,7 +3,7 @@ version: "3.9"
 services:
 
   locust:
-    build: .
+    image: locustio/locust:2.9.0
     ports:
      - "8089:8089"
     volumes:
