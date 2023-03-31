@@ -1,8 +1,4 @@
 # Endpoint prefix for ralph
-ifeq ($(LRS),ralph)
-	ENDPOINT_PREFIX = xAPI
-endif
-
 RALPH_DB ?= es
 
 ES_INDEX = statements
@@ -17,7 +13,7 @@ run-es: ## run elasticsearch database
 	curl -X PUT $(ES_URL)/$(ES_INDEX)
 	@echo -e "\nConfiguring $(ES_INDEX) index..."
 	curl -X PUT $(ES_URL)/$(ES_INDEX)/_settings -H 'Content-Type: application/json' -d '{"index": {"number_of_replicas": 0}}'
-.PHONY: run-es 
+.PHONY: run-es
 
 run-async_es: ## run elasticsearch database for async backend
 run-async_es: \

@@ -1,0 +1,61 @@
+#!/usr/bin/env bash
+
+set -eo pipefail
+
+declare DOCKER_USER
+declare COMPOSE
+
+DOCKER_USER="$(id -u):$(id -g)"
+if docker compose &> /dev/null ; then
+  COMPOSE="docker compose"
+else
+  if which docker-compose &> /dev/null ; then
+    COMPOSE="docker-compose"
+  else
+    echo "Docker compose is required to run this script. Please, install it first."
+    exit 1
+  fi
+fi
+
+# Command-line arguments
+declare LBT_LRS_ROOT_URL
+declare LBT_PROTOCOL
+declare -i LBT_DURATION=900
+declare -i LBT_CONCURRENT_USERS=1
+declare -i LBT_STATEMENTS_PER_REQUEST=1
+
+if [[ -z "${2}" ]]; then
+  echo "usage: bin/bench LRS_ROOT_URL PROTOCOL [DURATION] [CONCURRENT_USERS] [STATEMENTS_PER_REQUEST]"
+  exit 1
+fi
+
+LBT_LRS_ROOT_URL="${1}"
+LBT_PROTOCOL="${2}"
+LBT_DURATION="${3:-$LBT_DURATION}"
+LBT_CONCURRENT_USERS="${4:-$LBT_CONCURRENT_USERS}"
+LBT_STATEMENTS_PER_REQUEST="${5:-$LBT_STATEMENTS_PER_REQUEST}"
+
+# Hard-coded defaults
+declare -i LBT_SPAWN_RATE=${LBT_CONCURRENT_USERS}
+declare -i LBT_STOP_TIMEOUT=0
+declare LBT_RUNS_DIR="./runs"
+declare LBT_WORKING_DIR
+LBT_WORKING_DIR="$(date --iso-8601=ns)"
+
+# Create run directory and create parameters file
+mkdir -p "${LBT_RUNS_DIR}/${LBT_WORKING_DIR}"
+declare | egrep "^LBT" > "${LBT_RUNS_DIR}/${LBT_WORKING_DIR}/parameters.txt"
+
+# Run baby run
+DOCKER_USER=${DOCKER_USER} ${COMPOSE} \
+  -f docker-compose.yml \
+  run --rm locust \
+      -f "${LBT_PROTOCOL}" \
+      -H "${LBT_LRS_ROOT_URL}" \
+      --statements-per-req "${LBT_STATEMENTS_PER_REQUEST}" \
+      --csv="/app/${LBT_RUNS_DIR}/${LBT_WORKING_DIR}/run" \
+      --run-time ${LBT_DURATION}s \
+      --stop-timeout ${LBT_STOP_TIMEOUT} \
+      --headless \
+      -u "${LBT_CONCURRENT_USERS}" \
+      -r "${LBT_SPAWN_RATE}"
