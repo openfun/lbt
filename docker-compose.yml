@@ -6,19 +6,11 @@ services:
     image: locustio/locust:2.9.0
     ports:
      - "8089:8089"
+    working_dir: /app
     volumes:
-      - ./src:/mnt/locust
-      - ./data:/mnt/data
-      - ./runs/${RUN_DIR:-..}/results:/mnt/results
-    command: -f /mnt/locust/${SCENARIO:-post}.py
-             -H "http://${LRS:-ralph}:${LRS_PORT:-8090}/${ENDPOINT_PREFIX:-xAPI}"
-             --lrs-login ${LRS_LOGIN:-AAA}
-             --lrs-password ${LRS_PASSWORD:-BBB}
-             --statements-per-req ${STATEMENTS_PER_REQ:-1}
-             --csv=/mnt/results/${RESULT_PREFIX:-run}_${LRS:-ralph}_${SCENARIO:-post}_${ITERATION:-1}
-             --run-time ${RUN_TIME:-100}s
-             --stop-timeout ${STOP_TIMEOUT:-0}
-             --headless -u ${USERS_NUMBER:-1} -r ${SPAWN_RATE:-1}
+      - ./src:/app/locust
+      - ./data:/app/data
+      - ./runs:/app/runs
 
   datasim:
     image: yetanalytics/datasim:latest

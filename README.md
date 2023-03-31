@@ -11,8 +11,48 @@ that best fit with their needs and constraints.
 
 ## Quick start guide (for developers)
 
-Once you've cloned the project, modify the `protocol` file to reflect what you
-test you want to run.
+Once you've cloned the project, start an LRS using:
+
+```
+$ make run-lrs-ralph
+```
+
+And then run a benchmark:
+
+```
+$ bin/bench \
+      http://AAA:BBB@ralph:8090/xAPI \
+      /app/locust/post.py \
+      30 \
+      1 \
+      1
+```
+
+Usage of the `bin/bench` script is:
+
+```
+usage: bin/bench LRS_ROOT_URL PROTOCOL [DURATION] [CONCURRENT_USERS] [STATEMENTS_PER_REQUEST]
+```
+
+You will find your results in the latest runs directory:
+
+```
+$ ls runs | tail -n 1
+```
+
+You should see a bunch of CSV files created by `locust` and a `parameters.txt`
+file containing the input parameters used for this run:
+
+```
+runs/2023-03-31T17:04:04,102856292-04:00
+├── parameters.txt
+├── run_exceptions.csv
+├── run_failures.csv
+├── run_stats.csv
+└── run_stats_history.csv
+
+0 directories, 5 files
+```
 
 ## Contributing
 

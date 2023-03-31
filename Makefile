@@ -6,45 +6,7 @@ COMPOSE_TEST_RUN        = $(COMPOSE_RUN)
 COMPOSE_TEST_RUN_APP    = $(COMPOSE_TEST_RUN) app
 DOCKERIZE               = $(COMPOSE_RUN) dockerize
 
-# -- LRS to be tested
-LRS             ?= ralph
-LRS_PORT        ?= 8090
-
-# -- Locust configuration
-# Scenario to be run
-SCENARIO          ?= post
-# Number of the iteration
-ITERATION          ?= 01
-# Number of locust users
-USERS_NUMBER       ?= 1
-# Number of users to be spawned by seconds
-SPAWN_RATE         ?= 1
-# Duration of the run (in seconds)
-RUN_TIME           ?= 900
-# Time to stop its tasks at the end of the run 
-STOP_TIMEOUT       ?= 0
-# Number of students emitting statements
-STUDENTS_NUMBER    ?= 200
-# Seed for generating random students
-STUDENT_SEED       ?= 742
-# Number of statements sent per request
-STATEMENTS_PER_REQ ?= 2200
-# Total number of statements to be sent in a run
-STATEMENT_NUMBER = $(shell echo $$(($(STATEMENTS_PER_REQ) * 100)))
-# Prefix for locust result files
-RESULT_PREFIX ?= run
-
-# Directory of the run 
-RUN_DIR ?= 
-
-# -- Credentials
-LRS_LOGIN    = AAA
-LRS_PASSWORD = BBB
-
 default: help
-
-# Export variables to environment 
-export
 
 # Include implemented LRS makefiles
 include $(wildcard stores/*/Makefile)
@@ -74,7 +36,7 @@ dataset: ## generate the dataset
 	@echo "Generating dataset..."
 	@$(COMPOSE_RUN) datasim \
 		-i /data/spec/dataset.spec.json generate | \
-		split -l $(STATEMENTS_PER_REQ) -d --suffix-length=4 --additional-suffix=.json - ./data/set/dataset- 
+		split -l $(STATEMENTS_PER_REQ) -d --suffix-length=4 --additional-suffix=.json - ./data/set/dataset-
 
 	@echo "Dataset of $(STATEMENT_NUMBER) statements successfully generated!"
 .PHONY: dataset
@@ -108,14 +70,6 @@ run: \
 	run-lrs-$(LRS) \
 	run-locust
 .PHONY: run
-
-start-protocol: ## start a run
-	$(eval RUN_DIR := $(shell date +"%Y-%m-%d_%Hh%Mm%Ss"))
-	@mkdir runs/$(RUN_DIR) && mkdir runs/$(RUN_DIR)/results
-	@cp bin/protocol runs/$(RUN_DIR)
-	@echo "Starting protocol under $(RUN_DIR)"
-	@runs/$(RUN_DIR)/protocol
-.PHONY: start-protocol
 
 status: ## an alias for "docker-compose ps"
 	@$(COMPOSE) ps
