@@ -3,10 +3,11 @@ version: "3.9"
 services:
 
   locust:
-    image: locustio/locust:2.9.0
+    build: .
     ports:
      - "8089:8089"
     working_dir: /app
+    # network_mode: host
     volumes:
       - ./src:/app/locust
       - ./data:/app/data
@@ -17,8 +18,11 @@ services:
     environment:
       - CREDENTIALS=admin:funfunfun
       - API_ALLOWED_ORIGINS=*
+    entrypoint: "bin/server.sh"
+    ports:
+      - 9090:9090
     volumes:
-      - ./data:/data
+      - ./data:/bundle/data
 
   notebooks-notebook:
     build: ./notebooks
