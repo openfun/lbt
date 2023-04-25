@@ -16,6 +16,8 @@ else
     exit 1
   fi
 fi
+# Ignore docker orphans warning
+export COMPOSE_IGNORE_ORPHANS=True
 
 # Command-line arguments
 declare LBT_LRS_ROOT_URL
@@ -46,6 +48,15 @@ LBT_WORKING_DIR="$(date --iso-8601=ns)"
 mkdir -p "${LBT_RUNS_DIR}/${LBT_WORKING_DIR}"
 declare | egrep "^LBT" > "${LBT_RUNS_DIR}/${LBT_WORKING_DIR}/parameters.txt"
 
+# Run datasim server
+DOCKER_USER=${DOCKER_USER} ${COMPOSE} \
+  -f docker-compose.yml \
+  up -d datasim
+DOCKER_USER=${DOCKER_USER} ${COMPOSE} \
+  run --rm dockerize \
+  -wait http://datasim:9090/health \
+  -timeout 60s 
+
 # Run baby run
 DOCKER_USER=${DOCKER_USER} ${COMPOSE} \
   -f docker-compose.yml \
@@ -59,3 +70,8 @@ DOCKER_USER=${DOCKER_USER} ${COMPOSE} \
       --headless \
       -u "${LBT_CONCURRENT_USERS}" \
       -r "${LBT_SPAWN_RATE}"
+
+# Stop datasim server
+DOCKER_USER=${DOCKER_USER} ${COMPOSE} \
+  -f docker-compose.yml \
+  rm -s datasim
